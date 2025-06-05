@@ -1,0 +1,99 @@
+import streamlit as st
+import base64
+
+
+# --- Function to load local image and convert to base64 ---
+def get_base64_bg(file):
+    with open(file, "rb") as f:
+        data = f.read()
+    return base64.b64encode(data).decode()
+
+
+# --- Page config ---
+st.set_page_config(page_title="Typing Speed Tester", layout="wide")
+
+# --- Set background using local image ---
+bg_img = get_base64_bg("bg.jpg")
+st.markdown(
+    f"""
+    <style>
+    .stApp {{
+        background: url("data:image/jpeg;base64,{bg_img}") no-repeat center center fixed;
+        background-size: cover;
+    }}
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: -1;
+    }}
+    .card {{
+        padding: 1.5rem;
+        border-radius: 12px;
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        text-align: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        backdrop-filter: blur(10px);
+    }}
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
+# --- UI Title ---
+st.title("⌨️ Typing Speed Tester")
+st.write("Test your typing speed in a beautiful dark-themed app!")
+
+text_to_type = "The quick brown fox jumps over the lazy dog."
+st.markdown(f"**Text to type:** `{text_to_type}`")
+
+# --- Session State ---
+if "started" not in st.session_state:
+    st.session_state.started = False
+if "show_result" not in st.session_state:
+    st.session_state.show_result = False
+
+# --- Start Button ---
+if not st.session_state.started:
+    if st.button("Start Test"):
+        st.session_state.started = True
+        st.rerun()  # ✅ NEW FIXED VERSION
+
+# --- Input Field after starting ---
+if st.session_state.started and not st.session_state.show_result:
+    user_input = st.text_input(
+        "Start typing here and press Enter when done:", key="typing_input"
+    )
+    if user_input != "":
+        st.session_state.show_result = True
+        st.rerun()  # ✅ NEW FIXED VERSION
+
+# --- Show Results after Enter is pressed ---
+if st.session_state.show_result:
+    st.success("✅ Test Completed! Showing Results...")
+
+    # --- Demo values ---
+    time_taken = 12.4
+    correct_chars = 41
+    accuracy = 95.3
+    wpm = 43.2
+
+    # --- Stat Cards ---
+    col1, col2, col3, col4 = st.columns(4)
+    col1.markdown(
+        f"<div class='card'><h3>⏱️ Time Taken</h3><h2>{time_taken}s</h2></div>",
+        unsafe_allow_html=True,
+    )
+    col2.markdown(
+        f"<div class='card'><h3>✅ Correct Chars</h3><h2>{correct_chars}</h2></div>",
+        unsafe_allow_html=True,
+    )
+    col3.markdown(
+        f"<div class='card'><h3>🎯 Accuracy</h3><h2>{accuracy}%</h2></div>",
+        unsafe_allow_html=True,
+    )
+    col4.markdown(
+        f"<div class='card'><h3>🚀 WPM</h3><h2>{wpm}</h2></div>", unsafe_allow_html=True
+    )
